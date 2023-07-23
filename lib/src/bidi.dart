@@ -2,8 +2,8 @@ part of bidi;
 
 /// Implementation of the BIDI algorithm, as described in http://www.unicode.org/reports/tr9/tr9-17.html
 /// [logicalString] is the original logical-ordered string. Returns the visual representation of the string.
-List<int> logicalToVisual(String logicalString) {
-  final pars = splitStringToParagraphs(logicalString);
+List<int> logicalToVisual(String logicalString, {Options options = const Options()}) {
+  final pars = splitStringToParagraphs(logicalString, options: options);
   final sb = <int>[];
   for (final p in pars) {
     sb.addAll(p.bidiText);
@@ -20,8 +20,9 @@ List<int> logicalToVisual(String logicalString) {
 String logicalToVisual2(
   String logicalString,
   List<int> indexes,
-  List<int> lengths,
-) {
+  List<int> lengths, {
+  Options options = const Options(),
+}) {
   //Section 3:
   //1. seperate text into paragraphs
   //2. resulate each paragraph to its embeding levels of text
@@ -35,7 +36,7 @@ String logicalToVisual2(
   //(4) resolving neutral types.
   //(5) resolving implicit embedding levels.
 
-  List<Paragraph> pars = splitStringToParagraphs(logicalString);
+  List<Paragraph> pars = splitStringToParagraphs(logicalString, options: options);
   final sb = <int>[];
   for (Paragraph p in pars) {
     sb.addAll(p.bidiText);
@@ -52,7 +53,7 @@ String logicalToVisual2(
 /// Within each paragraph, apply all the other rules of this algorithm.
 ///
 /// 3.3.1.P1.
-List<Paragraph> splitStringToParagraphs(String logicalString) {
+List<Paragraph> splitStringToParagraphs(String logicalString, {Options options = const Options()}) {
   List<Paragraph> ret = [];
 
   var sb = <int>[];
@@ -60,7 +61,7 @@ List<Paragraph> splitStringToParagraphs(String logicalString) {
     final c = logicalString.codeUnits[i];
     final cType = _getBidiCharacterType(c);
     if (cType == _BidiCharacterType.B) {
-      final p = Paragraph._(sb, c);
+      final p = Paragraph._(sb, c,options: options);
       ret.add(p);
       sb = [];
     } else {
@@ -69,7 +70,23 @@ List<Paragraph> splitStringToParagraphs(String logicalString) {
   }
   if (sb.isNotEmpty) // string ended without a paragraph separator
   {
-    ret.add(Paragraph._(sb, _BidiChars.NotAChar));
+    ret.add(Paragraph._(sb, _BidiChars.NotAChar,options: options));
   }
   return ret;
+}
+
+/// Holds configurations for the conversion process.
+class Options {
+  /// Default constructor.
+  const Options({
+    this.useBasicArabicCharForm = false,
+  });
+
+  /// If true, the algorithm will use the basic form of the letter instead of the isolated form.
+  ///
+  /// For example, the letter 'ل' has an isolated form (0x644) and a basic form (0xFE8E).
+  /// setting this option to true will result in the letter 'ل' being remapped as 0xFE8E instead of 0x644.
+  ///
+  /// defaults to false.
+  final bool useBasicArabicCharForm;
 }

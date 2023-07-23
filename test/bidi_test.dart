@@ -42,4 +42,63 @@ void main() {
       );
     }
   });
+
+  test(
+    'Compositing Arabic letters with Options.useBasicArabicCharForm set to true should remap to basic form instead of isolated form',
+    () {
+
+
+      const arabicLetters = <String>[
+        'ا',
+        'ب',
+        'ت',
+        'ث',
+        'ج',
+        'ح',
+        'خ',
+        'د',
+        'ذ',
+        'ر',
+        'ز',
+        'س',
+        'ش',
+        'ص',
+        'ض',
+        'ط',
+        'ظ',
+        'ع',
+        'غ',
+        'ف',
+        'ق',
+        'ك',
+        'ل',
+        'م',
+        'ن',
+        'ه',
+        'و',
+        'ي',
+        'ء',
+        'آ',
+        'أ',
+        'ؤ',
+        'إ',
+        'ئ',
+        'ة',
+        'ى',
+      ];
+
+      /// dart's letter codeUnits for isolated form = basic form
+      /// so it's safe to test against them
+      for (final letter in arabicLetters) {
+        expect(
+          bidi.logicalToVisual(
+            letter,
+            options: const bidi.Options(useBasicArabicCharForm: true),
+          ),
+          letter.codeUnits,
+          reason: 'Failing letter: $letter',
+        );
+      }
+    },
+  );
 }

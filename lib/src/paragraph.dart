@@ -3,10 +3,15 @@ part of bidi;
 /// Represents a paragraph in text.
 class Paragraph {
   /// Constructor.
-  Paragraph._(List<int> text, this._separator) {
+  Paragraph._(
+    List<int> text,
+    this._separator, {
+    Options options = const Options(),
+  }) : _options = options {
     this.text = text;
   }
 
+  final Options _options;
   final int _separator;
   final List<int> _originalText = [];
   final List<int> _text = [];
@@ -489,9 +494,9 @@ class Paragraph {
       for (int i = start; i < limit; ++i) {
         _BidiCharacterType t = _textData[i]._ct;
         // Rule I2.
-        if (t == _BidiCharacterType.L ||
-            t == _BidiCharacterType.AN ||
-            t == _BidiCharacterType.EN) _textData[i]._el += 1;
+        if (t == _BidiCharacterType.L || t == _BidiCharacterType.AN || t == _BidiCharacterType.EN) {
+          _textData[i]._el += 1;
+        }
       }
     }
   }
@@ -689,7 +694,8 @@ class Paragraph {
         }
       }
 
-      sb.add(_getCharacterByLetterForm(ch, letterForms[currPos]));
+      final charForms = _options.useBasicArabicCharForm ? _charFormsWithBasicForms : _charForms;
+      sb.add(_getCharacterByLetterForm(ch, letterForms[currPos], charForms));
     }
 
     return sb;
